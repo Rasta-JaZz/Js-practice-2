@@ -1,4 +1,4 @@
-export function modals(triggerSelector, modalSelector, closeSelector, closeClick = true) {
+export function modals(triggerSelector, modalSelector, closeSelector, closeClick = true, deleteTrigger = false) {
 	function bindModal() {
 		const trigger = document.querySelectorAll(triggerSelector),
 			modal = document.querySelector(modalSelector),
@@ -8,6 +8,7 @@ export function modals(triggerSelector, modalSelector, closeSelector, closeClick
 		trigger.forEach((elem) => {
 			elem.addEventListener("click", (e) => {
 				if (e.target) e.preventDefault()
+				if (deleteTrigger) e.target.remove()
 
 				dataClose.forEach((elem) => (elem.style.display = "none"))
 
@@ -29,6 +30,7 @@ export function modals(triggerSelector, modalSelector, closeSelector, closeClick
 			if (e.target === modal && closeClick) {
 				dataClose.forEach((elem) => (elem.style.display = "none"))
 				modal.style.display = "none"
+
 				document.body.style.overflow = ""
 				document.body.style.marginRight = "0px"
 			}

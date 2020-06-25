@@ -3495,14 +3495,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_modal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./modules/modal */ "./src/js/modules/modal.js");
 /* harmony import */ var _modules_forms__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modules/forms */ "./src/js/modules/forms.js");
 /* harmony import */ var _modules_formValidator__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modules/formValidator */ "./src/js/modules/formValidator.js");
+/* harmony import */ var _modules_slider__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./modules/slider */ "./src/js/modules/slider.js");
+
 
 
 
 window.addEventListener("DOMContentLoaded", function () {
   Object(_modules_modal__WEBPACK_IMPORTED_MODULE_0__["modals"])(".button-design", ".popup-design", ".popup-close");
-  Object(_modules_modal__WEBPACK_IMPORTED_MODULE_0__["modals"])(".button-consultation", ".popup-consultation", ".popup-close");
+  Object(_modules_modal__WEBPACK_IMPORTED_MODULE_0__["modals"])(".button-consultation", ".popup-consultation", ".popup-design .popup-close");
+  Object(_modules_modal__WEBPACK_IMPORTED_MODULE_0__["modals"])(".fixed-gift", ".popup-gift", ".popup-gift .popup-close", true, true);
   Object(_modules_forms__WEBPACK_IMPORTED_MODULE_1__["forms"])();
   Object(_modules_formValidator__WEBPACK_IMPORTED_MODULE_2__["default"])();
+  Object(_modules_slider__WEBPACK_IMPORTED_MODULE_3__["default"])(".feedback-slider-item", "", ".main-prev-btn", ".main-next-btn");
+  Object(_modules_slider__WEBPACK_IMPORTED_MODULE_3__["default"])(".main-slider-item", "vertical");
 });
 
 /***/ }),
@@ -3531,24 +3536,23 @@ var formValidator = function formValidator() {
   var forms = [phoneInputs, userEmail, userComment, userName];
   var emailReg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
   var cyrillicReg = /^[а-яА-ЯёЁ0-9]+$/;
+  var span = document.createElement("span");
+  span.style.color = "red";
+  var error = {
+    email: "Некорректный email",
+    cyrillic: "Допустимы только русские символы"
+  };
   forms.forEach(function (arr) {
     arr.forEach(function (elem) {
       switch (elem.name) {
-        case "name":
-          elem.addEventListener("change", function () {
-            if (!cyrillicReg.test(elem.value)) return elem.value = "";
-          });
-          break;
-
-        case "message":
-          elem.addEventListener("change", function () {
-            if (!cyrillicReg.test(elem.value)) return elem.value = "";
-          });
-          break;
-
         case "email":
           elem.addEventListener("change", function () {
-            if (!emailReg.test(elem.value)) return elem.value = "";
+            if (!emailReg.test(elem.value)) {
+              span.textContent = error.email;
+              elem.parentNode.insertBefore(span, elem);
+            } else {
+              span.remove();
+            }
           });
           break;
 
@@ -3556,6 +3560,17 @@ var formValidator = function formValidator() {
           elem.addEventListener("input", function () {
             elem.value = isNaN(+elem.value) ? "" : +elem.value;
           });
+
+        default:
+          elem.addEventListener("change", function () {
+            if (!cyrillicReg.test(elem.value)) {
+              span.textContent = error.cyrillic;
+              elem.parentNode.insertBefore(span, elem);
+            } else {
+              span.remove();
+            }
+          });
+          break;
       }
     });
   });
@@ -3680,6 +3695,7 @@ __webpack_require__.r(__webpack_exports__);
 
 function modals(triggerSelector, modalSelector, closeSelector) {
   var closeClick = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+  var deleteTrigger = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
 
   function bindModal() {
     var trigger = document.querySelectorAll(triggerSelector),
@@ -3689,6 +3705,7 @@ function modals(triggerSelector, modalSelector, closeSelector) {
     trigger.forEach(function (elem) {
       elem.addEventListener("click", function (e) {
         if (e.target) e.preventDefault();
+        if (deleteTrigger) e.target.remove();
         dataClose.forEach(function (elem) {
           return elem.style.display = "none";
         });
@@ -3727,6 +3744,74 @@ function modals(triggerSelector, modalSelector, closeSelector) {
 
   bindModal(triggerSelector, modalSelector, closeSelector);
 }
+
+/***/ }),
+
+/***/ "./src/js/modules/slider.js":
+/*!**********************************!*\
+  !*** ./src/js/modules/slider.js ***!
+  \**********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var core_js_modules_web_dom_collections_for_each__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/web.dom-collections.for-each */ "./node_modules/core-js/modules/web.dom-collections.for-each.js");
+/* harmony import */ var core_js_modules_web_dom_collections_for_each__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_for_each__WEBPACK_IMPORTED_MODULE_0__);
+
+
+var slider = function slider(slides, dir, prev, next) {
+  var slideIndex = 1;
+  var items = document.querySelectorAll(slides);
+
+  function showSlides(n) {
+    if (n > items.length) slideIndex = 1;
+    if (n < 1) slideIndex = items.length;
+    items.forEach(function (elem) {
+      elem.classList.add("animated");
+      elem.style.display = "none";
+    });
+    items[slideIndex - 1].style.display = "block";
+  }
+
+  showSlides(slideIndex);
+
+  function nextSlide(n) {
+    showSlides(slideIndex += 1);
+  }
+
+  try {
+    var prevBtn = document.querySelector(prev),
+        nextBtn = document.querySelector(next);
+    prevBtn.addEventListener("click", function () {
+      nextSlide(-1);
+      items[slideIndex - 1].classList.remove("slideInRight");
+      items[slideIndex - 1].classList.add("slideInLeft");
+    });
+    nextBtn.addEventListener("click", function () {
+      nextSlide(1);
+      items[slideIndex - 1].classList.remove("slideInLeft");
+      items[slideIndex - 1].classList.add("slideInRight");
+    });
+  } catch (error) {
+    console.log(error);
+  }
+
+  if (dir === "vertical") {
+    setInterval(function () {
+      nextSlide(1);
+      items[slideIndex - 1].classList.add("slideInDown");
+    }, 3000);
+  } else {
+    setInterval(function () {
+      nextSlide(1);
+      items[slideIndex - 1].classList.remove("slideInRight");
+      items[slideIndex - 1].classList.add("slideInLeft");
+    }, 3000);
+  }
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (slider);
 
 /***/ })
 
