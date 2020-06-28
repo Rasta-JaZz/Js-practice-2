@@ -3613,6 +3613,10 @@ function forms(state) {
     success: "Спасибо! Скоро мы с вами свяжемся",
     fail: "Ошибка сервера..."
   };
+  var path = {
+    designer: "../../assets/server.php",
+    question: "../../assets/question.php"
+  };
 
   var postData = function postData(url, data) {
     var res;
@@ -3656,6 +3660,8 @@ function forms(state) {
       statusMessage.classList.add("status");
       elem.appendChild(statusMessage);
       var formData = new FormData(elem);
+      var api = "";
+      elem.closest(".popup-design") ? api = path.designer : api = path.question;
 
       if (elem.getAttribute("data-calc") === "end") {
         for (var key in state) {
@@ -3663,7 +3669,7 @@ function forms(state) {
         }
       }
 
-      postData("assets/server.php", formData).then(function (res) {
+      postData(api, formData).then(function (res) {
         console.log("res :>> ", res);
         statusMessage.textContent = message.success;
       }).catch(function () {
@@ -3761,7 +3767,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var slider = function slider(slides, dir, prev, next) {
-  var slideIndex = 1;
+  var slideIndex = 1,
+      paused = false;
   var items = document.querySelectorAll(slides);
 
   function showSlides(n) {
@@ -3797,18 +3804,27 @@ var slider = function slider(slides, dir, prev, next) {
     console.log(error);
   }
 
-  if (dir === "vertical") {
-    setInterval(function () {
-      nextSlide(1);
-      items[slideIndex - 1].classList.add("slideInDown");
-    }, 3000);
-  } else {
-    setInterval(function () {
-      nextSlide(1);
-      items[slideIndex - 1].classList.remove("slideInRight");
-      items[slideIndex - 1].classList.add("slideInLeft");
-    }, 3000);
+  function activateAnimation() {
+    if (dir === "vertical") {
+      paused = setInterval(function () {
+        nextSlide(1);
+        items[slideIndex - 1].classList.add("slideInDown");
+      }, 3000);
+    } else {
+      paused = setInterval(function () {
+        nextSlide(1);
+        items[slideIndex - 1].classList.remove("slideInRight");
+        items[slideIndex - 1].classList.add("slideInLeft");
+      }, 3000);
+    }
   }
+
+  items[0].parentNode.addEventListener("mouseenter", function () {
+    return clearInterval(paused);
+  });
+  items[0].parentNode.addEventListener("mouseleave", function () {
+    return activateAnimation();
+  });
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (slider);

@@ -8,6 +8,11 @@ export function forms(state) {
 		fail: "Ошибка сервера...",
 	}
 
+	const path = {
+		designer: "assets/server.php",
+		question: "assets/question.php",
+	}
+
 	const postData = async (url, data) => {
 		document.querySelector(".status").textContent = message.loading
 
@@ -33,13 +38,16 @@ export function forms(state) {
 
 			let formData = new FormData(elem)
 
+			let api = ""
+			elem.closest(".popup-design") ? (api = path.designer) : (api = path.question)
+
 			if (elem.getAttribute("data-calc") === "end") {
 				for (let key in state) {
 					formData.append(key, state[key])
 				}
 			}
 
-			postData("assets/server.php", formData)
+			postData(api, formData)
 				.then((res) => {
 					console.log("res :>> ", res)
 					statusMessage.textContent = message.success
